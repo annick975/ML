@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+        }
+        .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+        .form-check-input {
+            width: 1.2em;
+            height: 1.2em;
+            margin-top: 0.2em;
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+            .table th, .table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Mark Attendance - {{ today|date:"F j, Y" }}</h2>
+        <a href="{% url 'attendance:add_student' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Add New Student
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" id="attendanceForm">
+                {% csrf_token %}
+                <input type="hidden" name="date" value="{{ today|date:'Y-m-d' }}">
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Classroom</th>
+                                <th class="text-center">Present</th>
+                                <th class="text-center">Absent</th>
+                                <th class="text-center">Late</th>
+                                <th class="text-center">Excused</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in attendance_data %}
+                            <tr>
+                                <td>{{ item.student.name }}</td>
+                                <td>{{ item.student.classroom|default:"-" }}</td>
+                                <td class="text-center">
+                                    <div class="form-check d-flex justify-content-center">
+                                        <input class="form-check-input" type="radio" 
+                                               name="status_{{ item.student.id }}" 
+                                               value="present" 
+                                               {% if item.attendance and item.attendance.present %}checked{% endif %}
+                                               onchange="updateAttendance({{ item.student.id }}, 'present')">
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="form-check d-flex justify-content-center">
+                                        <input class="form-check-input" type="radio" 
+                                               name="status_{{ item.student.id }}" 
+                                               value="absent"
+                                               {% if not item.attendance or not item.attendance.present %}checked{% endif %}
+                                               onchange="updateAttendance({{ item.student.id }}, 'absent')">
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No students found. <a href="{% url 'attendance:add_student' %}">Add a student</a> to get started.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateAttendance(studentId, status) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{% url "attendance:mark_attendance" %}';
+    
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = 'csrfmiddlewaretoken';
+    csrf.value = '{{ csrf_token }}';
+    
+    const studentInput = document.createElement('input');
+    studentInput.type = 'hidden';
+    studentInput.name = 'student_id';
+    studentInput.value = studentId;
+    
+    const statusInput = document.createElement('input');
+    statusInput.type = 'hidden';
+    statusInput.name = 'status';
+    statusInput.value = status;
+    
+    const dateInput = document.createElement('input');
+    dateInput.type = 'hidden';
+    dateInput.name = 'date';
+    dateInput.value = '{{ today|date:"Y-m-d" }}';
+    
+    form.appendChild(csrf);
+    form.appendChild(studentInput);
+    form.appendChild(statusInput);
+    form.appendChild(dateInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+
+<style>
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.form-check-input {
+    width: 1.2em;
+    height: 1.2em;
+    margin-top: 0.2em;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .table th, .table td {
+        padding: 0.5rem;
+    }
+}
+</style>
+</div>
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
