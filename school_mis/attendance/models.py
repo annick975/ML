@@ -2,9 +2,21 @@ from django.db import models
 from django.utils import timezone
 
 class Student(models.Model):
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    ]
+    
+    RESIDENCE_CHOICES = [
+        ('Boarding', 'Boarding'),
+        ('Day', 'Day'),
+    ]
+    
     name = models.CharField(max_length=100)
     classroom = models.CharField(max_length=100)
-    
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='M')
+    residence = models.CharField(max_length=10, choices=RESIDENCE_CHOICES, default='Boarding')
 
     class Meta:
         db_table = "student"

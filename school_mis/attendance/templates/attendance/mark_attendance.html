@@ -84,8 +84,7 @@
                                 <th>Classroom</th>
                                 <th class="text-center">Present</th>
                                 <th class="text-center">Absent</th>
-                                <th class="text-center">Late</th>
-                                <th class="text-center">Excused</th>
+                             
                             </tr>
                         </thead>
                         <tbody>
@@ -95,7 +94,7 @@
                                 <td>{{ item.student.classroom|default:"-" }}</td>
                                 <td class="text-center">
                                     <div class="form-check d-flex justify-content-center">
-                                        <input class="form-check-input" type="radio" 
+                                        <input class="form-check-input" type="checkbox" 
                                                name="status_{{ item.student.id }}" 
                                                value="present" 
                                                {% if item.attendance and item.attendance.present %}checked{% endif %}
@@ -104,7 +103,7 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="form-check d-flex justify-content-center">
-                                        <input class="form-check-input" type="radio" 
+                                        <input class="form-check-input" type="checkbox" 
                                                name="status_{{ item.student.id }}" 
                                                value="absent"
                                                {% if not item.attendance or not item.attendance.present %}checked{% endif %}

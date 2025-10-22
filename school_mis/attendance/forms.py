@@ -5,7 +5,7 @@ from .models import Student, Attendance
 class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
-        fields = ['name', 'classroom']
+        fields = ['name', 'classroom', 'gender', 'residence']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -13,6 +13,13 @@ class StudentForm(forms.ModelForm):
             }),
             'classroom': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'ENter classroom name'
+                'placeholder': 'Enter classroom name'
             }),
+            'gender': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'residence': forms.Select(attrs={
+                'class': 'form-control',
+                'default': 'Boarding'
+            })
         }

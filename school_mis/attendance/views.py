@@ -1,6 +1,6 @@
 from time import timezone
 from django.shortcuts import redirect, render, get_object_or_404
-
+from django.contrib import messages
 from django.db.models import Count, Q
 from datetime import date, timedelta
 from .models import Attendance, Student
@@ -12,7 +12,9 @@ def add_student(request):
         form = StudentForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('attendance:mark_attendance')
+            messages.success(request, 'Student added successfully!')
+            return redirect('attendance:add_student')
+        
     else:
         form = StudentForm()
     return render(request, 'attendance/add_student.html', {'form': form})
